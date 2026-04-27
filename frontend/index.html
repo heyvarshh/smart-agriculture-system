@@ -1,0 +1,2968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Kisan - Intelligent Agriculture Management</title>
+    <!-- SEO tags -->
+    <meta name="description" content="Your Digital Farm Companion for Modern Agriculture. Smart Kisan provides real-time monitoring, smart irrigation control, and predictive analytics.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <style>
+        /* CSS VARIABLES */
+        :root {
+            --primary-forest: #2d5a4a;
+            --primary-forest-dark: #1b3a2e;
+            --mint-green: #52b788;
+            --mint-mist: #d8f3dc;
+            --sage-bg: #f0faf2;
+            --warm-white: #fefcf8;
+            --earth-brown: #8B5E3C;
+            --harvest-gold: #d4a574;
+            --coral-alert: #ff6b6b;
+            --emerald-success: #06a77d;
+            --amber-warning: #f4a261;
+            --peach-bg: #ffe5d9;
+            --text-dark: #1a2e1a;
+            --text-muted: #5a7a59;
+
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            --shadow-soft: 0 8px 32px rgba(45, 90, 74, 0.10);
+            --shadow-hover: 0 20px 60px rgba(45, 90, 74, 0.18);
+            --shadow-glow: 0 8px 24px rgba(82, 183, 136, 0.4);
+            --shadow-alert: 0 8px 24px rgba(255, 107, 107, 0.4);
+            
+            --radius-sm: 12px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            --sidebar-width: 280px;
+        }
+
+        /* GLOBAL RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--sage-bg);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            /* Subtle repeating SVG pattern of wheat stalks/leaves */
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0c0 11.046-8.954 20-20 20 11.046 0 20 8.954 20 20 0-11.046 8.954-20 20-20-11.046 0-20-8.954-20-20z' fill='%232d5a4a' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 600;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        button {
+            font-family: var(--font-body);
+            cursor: pointer;
+            border: none;
+            outline: none;
+            background: none;
+            transition: all var(--transition-smooth);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* TYPOGRAPHY UTILS */
+        .text-mono { font-family: var(--font-mono); }
+        .text-muted { color: var(--text-muted); }
+        .text-dark { color: var(--text-dark); }
+        .text-primary { color: var(--primary-forest); }
+        .text-mint { color: var(--mint-green); }
+        
+        /* LAYOUT & PAGES */
+        #app {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .page {
+            display: none;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .page.active {
+            display: block;
+            animation: pageFadeIn 0.35s ease-out forwards;
+        }
+
+        .page.outgoing {
+            display: block;
+            animation: pageFadeOut 0.15s ease-in forwards;
+        }
+
+        @keyframes pageFadeIn {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pageFadeOut {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* SVG ICONS SPRITE */
+        .svg-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        /* ANIMATIONS */
+        .stagger-1 { animation-delay: 0.1s !important; }
+        .stagger-2 { animation-delay: 0.2s !important; }
+        .stagger-3 { animation-delay: 0.3s !important; }
+        .stagger-4 { animation-delay: 0.4s !important; }
+        .stagger-5 { animation-delay: 0.5s !important; }
+        .stagger-6 { animation-delay: 0.6s !important; }
+        .stagger-7 { animation-delay: 0.7s !important; }
+        .stagger-8 { animation-delay: 0.8s !important; }
+        
+        .animate-up {
+            opacity: 0;
+            animation: slideUpFade 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseRed {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        }
+        
+        @keyframes pulseBorder {
+            0% { border-color: rgba(255, 107, 107, 0.2); box-shadow: 0 0 0 0 rgba(255,107,107,0.4); }
+            50% { border-color: var(--coral-alert); box-shadow: 0 0 15px rgba(255,107,107,0.6); }
+            100% { border-color: rgba(255, 107, 107, 0.2); box-shadow: 0 0 0 0 rgba(255,107,107,0.0); }
+        }
+
+        @keyframes flipCounter {
+            0% { transform: translateY(10px); opacity: 0; }
+            50% { transform: translateY(-5px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes bounceIcon {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--mint-green), var(--primary-forest));
+            color: white;
+            border-radius: var(--radius-md);
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-3px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-danger {
+            background: var(--coral-alert);
+            color: white;
+            border-radius: var(--radius-md);
+        }
+
+        .btn-danger:hover {
+            box-shadow: var(--shadow-alert);
+            transform: translateY(-3px);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--mint-mist);
+            color: var(--primary-forest);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--mint-green);
+            background: var(--mint-mist);
+        }
+        
+        .btn-icon-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--mint-mist);
+            color: var(--text-muted);
+            background: white;
+        }
+        
+        .btn-icon-circle:hover {
+            border-color: var(--mint-green);
+            color: var(--mint-green);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-icon-circle.danger:hover {
+            border-color: var(--coral-alert);
+            color: var(--coral-alert);
+            box-shadow: var(--shadow-alert);
+        }
+
+        /* --- CARDS --- */
+        .card {
+            background: var(--warm-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition-smooth);
+            padding: 24px;
+            border: 1px solid var(--mint-mist);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-8px);
+        }
+        
+        .card-xl {
+            border-radius: var(--radius-xl);
+        }
+
+        /* --- FORMS --- */
+        .form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--mint-mist);
+            background: var(--sage-bg);
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--mint-green);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.2);
+        }
+
+        .form-icon {
+            position: absolute;
+            left: 12px;
+            top: 36px;
+            color: var(--mint-green);
+            width: 18px;
+            height: 18px;
+        }
+        
+        .error-text {
+            color: var(--coral-alert);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        /* --- BADGES --- */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success { background: rgba(6, 167, 125, 0.15); color: var(--emerald-success); }
+        .badge-warning { background: rgba(244, 162, 97, 0.15); color: var(--amber-warning); }
+        .badge-danger { background: rgba(255, 107, 107, 0.15); color: var(--coral-alert); }
+        .badge-info { background: rgba(82, 183, 136, 0.15); color: var(--mint-green); }
+        .badge-neutral { background: rgba(90, 122, 89, 0.15); color: var(--text-muted); }
+
+        /* =========================================
+           1. LOGIN PAGE
+        ========================================= */
+        #login-page {
+            background: var(--warm-white);
+        }
+        
+        .login-split {
+            display: flex;
+            height: 100vh;
+        }
+
+        .login-left {
+            width: 60%;
+            background: linear-gradient(180deg, var(--primary-forest) 0%, var(--primary-forest-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            text-align: center;
+        }
+
+        .login-illustration {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .anim-wheat {
+            transform-origin: bottom center;
+            animation: sway 4s ease-in-out infinite alternate;
+        }
+        @keyframes sway {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        .anim-drop {
+            animation: floatUp 3s linear infinite;
+            opacity: 0;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-40px); opacity: 0; }
+        }
+
+        .anim-sun {
+            animation: pulseGlow 4s ease-in-out infinite alternate;
+        }
+        @keyframes pulseGlow {
+            0% { filter: drop-shadow(0 0 10px rgba(212, 165, 116, 0.4)); }
+            100% { filter: drop-shadow(0 0 30px rgba(212, 165, 116, 0.8)); }
+        }
+
+        .login-tagline {
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+
+        .login-subtagline {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+
+        .login-features {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .feature-badge {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            opacity: 0;
+        }
+
+        .login-right {
+            width: 40%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background: var(--warm-white);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--mint-mist);
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .login-logo svg {
+            width: 36px;
+            height: 36px;
+            color: var(--mint-green);
+        }
+
+        .login-logo h1 {
+            font-size: 32px;
+            color: var(--primary-forest);
+        }
+
+        .login-welcome {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+
+        .login-options a {
+            color: var(--mint-green);
+            font-weight: 600;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border-radius: var(--radius-md);
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* =========================================
+           2. APP SHELL (SIDEBAR & HEADER)
+        ========================================= */
+        #app-shell {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            display: none; /* hidden on login */
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-forest);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition-smooth);
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header svg {
+            width: 32px;
+            height: 32px;
+            color: var(--mint-green);
+        }
+
+        .sidebar-header h2 {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            color: white;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.15);
+            margin: 0 24px;
+        }
+
+        .sidebar-nav {
+            padding: 24px 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 24px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 500;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-link svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-link:hover svg {
+            animation: bounceIcon 0.4s ease;
+        }
+
+        .nav-link.active {
+            background: rgba(82, 183, 136, 0.2);
+            color: white;
+            border-left: 3px solid var(--mint-green);
+        }
+
+        .sidebar-footer {
+            padding: 24px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .user-profile-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-forest-dark);
+            color: var(--mint-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .user-info h4 {
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: var(--mint-green);
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* HEADER */
+        .top-header {
+            background: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--mint-mist);
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hamburger {
+            display: none;
+            color: var(--text-dark);
+        }
+
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-center {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--sage-bg);
+            color: var(--text-dark);
+        }
+        
+        .icon-btn:hover {
+            background: var(--mint-mist);
+            color: var(--mint-green);
+        }
+
+        .badge-dot {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            background: var(--coral-alert);
+            border-radius: 50%;
+        }
+        
+        /* CONTENT WRAPPER */
+        .content-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            position: relative;
+        }
+
+        /* PAGE HEADERS */
+        .page-header {
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 32px;
+            color: var(--primary-forest);
+            margin-bottom: 8px;
+        }
+        
+        .page-title svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .breadcrumb {
+            color: var(--text-muted);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            background: white;
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .action-left {
+            display: flex;
+            gap: 16px;
+            flex: 1;
+        }
+
+        /* =========================================
+           DASHBOARD PAGE
+        ========================================= */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--mint-mist), var(--sage-bg));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            color: var(--mint-green);
+            opacity: 0.5;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-family: var(--font-heading);
+            font-size: 40px;
+            color: var(--primary-forest);
+            margin-bottom: 8px;
+        }
+
+        .stat-trend {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .trend-up { color: var(--emerald-success); }
+        .trend-down { color: var(--coral-alert); }
+
+        .live-sensors-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .live-sensor-card {
+            text-align: center;
+        }
+
+        .sensor-value-large {
+            font-family: var(--font-heading);
+            font-size: 56px;
+            margin: 16px 0;
+            display: inline-block;
+        }
+
+        .sensor-bar-bg {
+            height: 8px;
+            background: var(--mint-mist);
+            border-radius: 4px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .sensor-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--mint-green), var(--primary-forest));
+            width: 0%;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .activity-feed {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .activity-feed-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--sage-bg);
+            animation: pageFadeIn 0.5s ease forwards;
+        }
+
+        .activity-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .activity-text { flex: 1; font-size: 14px; }
+        .activity-time { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+
+        /* =========================================
+           TABLES (FARMERS, CROPS, SENSORS, LOGS)
+        ========================================= */
+        .table-container {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden; /* Keep corners rounded */
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th {
+            background: var(--primary-forest);
+            color: white;
+            padding: 16px 24px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--sage-bg);
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #f7fcf7;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--mint-mist);
+            border-left: 3px solid var(--mint-green);
+        }
+
+        .td-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Expandable rows */
+        .expandable-row { cursor: pointer; }
+        .expanded-detail {
+            display: none;
+            padding: 24px;
+            background: var(--sage-bg);
+            border-bottom: 1px solid var(--mint-mist);
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Color-coded highlighting for sensors */
+        .row-warning { background: rgba(244, 162, 97, 0.3) !important; }
+        .row-critical { background: rgba(255, 107, 107, 0.4) !important; }
+        .row-info { background: rgba(82, 183, 136, 0.3) !important; }
+
+        .text-alert { font-weight: bold; color: var(--coral-alert); }
+        .text-warn { font-weight: bold; color: var(--amber-warning); }
+
+        /* =========================================
+           CROP MANAGEMENT TABS
+        ========================================= */
+        .season-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .season-tab {
+            padding: 10px 24px;
+            border-radius: 30px;
+            background: var(--mint-mist);
+            color: var(--primary-forest);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+        }
+
+        .season-tab.active {
+            background: linear-gradient(135deg, var(--mint-green), var(--primary-forest));
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .growth-stage-bar {
+            width: 100px;
+            height: 6px;
+            background: var(--mint-mist);
+            border-radius: 3px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .growth-fill {
+            height: 100%;
+            background: var(--mint-green);
+        }
+
+        /* =========================================
+           SENSOR DASHBOARD (THE CROWN JEWEL)
+        ========================================= */
+        .live-status-bar {
+            background: var(--primary-forest-dark);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--emerald-success);
+            border-radius: 50%;
+            animation: pulseGreen 1.5s infinite;
+        }
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 0 0 rgba(6, 167, 125, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(6, 167, 125, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(6, 167, 125, 0); }
+        }
+
+        .hero-sensors {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .hero-card {
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .hero-card.temp { background: linear-gradient(180deg, #fffaf0, #fefcf8); }
+        .hero-card.hum { background: linear-gradient(180deg, #f0f8ff, #fefcf8); }
+        .hero-card.soil { background: linear-gradient(180deg, #f0faf2, #fefcf8); }
+
+        .hero-card.critical {
+            animation: pulseBorder 2s infinite;
+        }
+
+        .hero-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+        }
+
+        .hero-value {
+            font-family: var(--font-heading);
+            font-size: 64px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .hero-unit {
+            font-size: 20px;
+            color: var(--text-muted);
+        }
+
+        .circular-progress {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+        }
+        .circular-progress svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .circle-bg { fill: none; stroke: var(--mint-mist); stroke-width: 8; }
+        .circle-fill { 
+            fill: none; 
+            stroke: var(--mint-green); 
+            stroke-width: 8; 
+            stroke-linecap: round; 
+            transition: stroke-dashoffset 1.5s ease-in-out, stroke 0.5s;
+        }
+        .circular-content {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .alert-strip {
+            display: flex;
+            gap: 16px;
+            overflow-x: hidden;
+            padding: 10px 0;
+            margin-bottom: 24px;
+            white-space: nowrap;
+        }
+
+        .alert-pill {
+            padding: 8px 16px;
+            background: white;
+            border-radius: 20px;
+            font-size: 13px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideLeft 20s linear infinite;
+        }
+        @keyframes slideLeft { 100% { transform: translateX(-1000px); } }
+
+        .sparklines-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        /* =========================================
+           IRRIGATION SYSTEM
+        ========================================= */
+        .irrigation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .zone-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .water-gauge {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--mint-mist);
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .water-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
+            transition: height 1s ease;
+        }
+        /* Wave animation */
+        .water-fill::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -50%;
+            width: 200%;
+            height: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%234facfe' fill-opacity='1' d='M0,160L48,144C96,128,192,96,288,106.7C384,117,480,171,576,165.3C672,160,768,96,864,80C960,64,1056,96,1152,112C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+            animation: wave 3s linear infinite;
+        }
+        @keyframes wave { 100% { transform: translateX(50%); } }
+
+        .gauge-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-heading);
+            font-size: 28px;
+            color: var(--text-dark);
+            z-index: 10;
+        }
+
+        .toggle-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .toggle-on { background: var(--emerald-success); color: white; }
+        .toggle-off { background: #e0e0e0; color: var(--text-muted); }
+
+        .toggle-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+        }
+        .toggle-on .toggle-dot { background: white; box-shadow: 0 0 10px white; }
+        .toggle-off .toggle-dot { background: #999; }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            gap: 2px;
+            background: var(--mint-mist);
+            border: 1px solid var(--mint-mist);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        .schedule-cell {
+            background: white;
+            padding: 10px;
+            text-align: center;
+            min-height: 60px;
+        }
+        .schedule-header { background: var(--sage-bg); font-weight: bold; font-size: 13px; }
+        .schedule-active {
+            background: linear-gradient(135deg, var(--mint-mist), var(--mint-green));
+            color: var(--primary-forest-dark);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* =========================================
+           ANALYTICS PAGE
+        ========================================= */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .chart-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* =========================================
+           DRAWERS, MODALS & TOASTS
+        ========================================= */
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .overlay.active { display: block; opacity: 1; }
+
+        /* Drawer */
+        .drawer {
+            position: fixed;
+            top: 0; right: -480px;
+            width: 480px;
+            height: 100vh;
+            background: white;
+            z-index: 1001;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .drawer.active { right: 0; }
+        .drawer-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--mint-mist);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .drawer-body {
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .drawer-footer {
+            padding: 24px;
+            border-top: 1px solid var(--mint-mist);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        /* Multi-select Tags */
+        .tags-input {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            padding: 8px; border: 1px solid var(--mint-mist); border-radius: var(--radius-sm);
+        }
+        .tag {
+            background: var(--mint-mist); color: var(--primary-forest);
+            padding: 4px 8px; border-radius: 12px; font-size: 12px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .tag-remove { cursor: pointer; font-weight: bold; }
+        .tags-input input { border: none; outline: none; flex: 1; min-width: 60px; }
+
+        /* Relationship Diagram */
+        .rel-diagram {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--sage-bg); padding: 16px; border-radius: var(--radius-md); margin-top: 24px;
+        }
+        .rel-box { background: white; padding: 10px; border-radius: 8px; font-size: 12px; text-align: center; border: 1px solid var(--mint-mist); }
+        .rel-box.center { border-color: var(--mint-green); background: var(--mint-mist); font-weight: bold; }
+        .rel-arrow { flex: 1; height: 2px; background: var(--mint-green); margin: 0 10px; position: relative; }
+        .rel-arrow::after {
+            content: ''; position: absolute; right: 0; top: -4px;
+            border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 5px solid var(--mint-green);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            z-index: 1002;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+        .modal-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: rgba(255, 107, 107, 0.1); color: var(--coral-alert);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .modal-icon svg { width: 40px; height: 40px; animation: pulseRed 2s infinite; }
+        .modal-title { font-family: var(--font-heading); font-size: 24px; margin-bottom: 12px; }
+        .modal-msg { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+
+        /* Toasts */
+        .toast-container {
+            position: fixed; top: 24px; right: 24px; z-index: 2000;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .toast {
+            background: white; padding: 16px 20px; border-radius: var(--radius-md);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex; align-items: center; gap: 12px;
+            transform: translateX(120%); transition: transform 0.3s ease-out;
+            border-left: 4px solid var(--mint-green);
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: var(--coral-alert); }
+        .toast.warning { border-left-color: var(--amber-warning); }
+        
+        /* =========================================
+           RESPONSIVE DESIGN
+        ========================================= */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            .stats-grid .stat-card:nth-child(4), .stats-grid .stat-card:nth-child(5) { grid-column: span 1.5; }
+        }
+        
+        @media (max-width: 992px) {
+            :root { --sidebar-width: 220px; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .hero-sensors { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .login-split { flex-direction: column; }
+            .login-left { width: 100%; height: 35vh; padding: 20px; }
+            .login-right { width: 100%; height: 65vh; align-items: flex-start; }
+            .login-illustration, .login-features, .login-subtagline { display: none; }
+            .login-tagline { font-size: 24px; }
+
+            .sidebar {
+                position: fixed; left: -280px; top: 0; height: 100vh;
+                width: 280px; box-shadow: var(--shadow-hover);
+            }
+            .sidebar.active { left: 0; }
+            .hamburger { display: block; }
+            
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid .stat-card { grid-column: span 1 !important; }
+            
+            .drawer { width: 100%; right: -100%; }
+            .grid-2 { grid-template-columns: 1fr; }
+            
+            .table-container { overflow-x: auto; }
+            .action-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+            
+            .hero-value { font-size: 48px; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .content-wrapper { padding: 12px; }
+            .top-header { padding: 12px; }
+            .btn { min-height: 44px; }
+            .hero-value { font-size: 40px; }
+        }
+
+        /* SVG definitions area */
+        .svg-defs { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- SVG SPRITES -->
+    <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg">
+        <symbol id="icon-leaf" viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22L6.66 19.7C7.14 19.87 7.64 20 8 20C19 20 22 3 22 3C21 5 14 5.25 9 6.25C4 7.25 2 11.5 2 13.5C2 15.5 3.75 17.25 3.75 17.25C7 8 17 8 17 8Z"/></symbol>
+        <symbol id="icon-home" viewBox="0 0 24 24"><path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/></symbol>
+        <symbol id="icon-farmer" viewBox="0 0 24 24"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/></symbol>
+        <symbol id="icon-seedling" viewBox="0 0 24 24"><path d="M22 21V19H2V21H22ZM11 15.22C9.57 14.25 8.35 12.87 7.45 11.2C6.54 12.87 5.31 14.24 3.89 15.22C4.1 14.33 4.22 13.4 4.22 12.44C4.22 8.33 7.55 5 11.66 5C11.9 5 12.11 5.03 12.33 5.05C11.5 6.46 11 8.12 11 9.89V15.22ZM14.07 16H15.93C15.98 15.42 16 14.82 16 14.22C16 10.22 12.78 7 8.78 7C8.61 7 8.44 7.03 8.28 7.04C9.35 6.4 10.6 6 11.93 6C16.39 6 20 9.61 20 14.07C20 14.73 19.93 15.37 19.8 16H14.07Z"/></symbol>
+        <symbol id="icon-waves" viewBox="0 0 24 24"><path d="M12 4C9.24 4 7 6.24 7 9C7 11.76 9.24 14 12 14C14.76 14 17 11.76 17 9C17 6.24 14.76 4 12 4ZM12 2C15.87 2 19 5.13 19 9C19 12.87 15.87 16 12 16C8.13 16 5 12.87 5 9C5 5.13 8.13 2 12 2ZM3.05 13H1.05C1.5 17.5 5 21 9.5 21V19C6.1 19 3.4 16.4 3.05 13ZM22.95 13H20.95C20.6 16.4 17.9 19 14.5 19V21C19 21 22.5 17.5 22.95 13Z"/></symbol>
+        <symbol id="icon-water" viewBox="0 0 24 24"><path d="M12 20C8.69 20 6 17.31 6 14C6 10 12 3.25 12 3.25C12 3.25 18 10 18 14C18 17.31 15.31 20 12 20Z"/></symbol>
+        <symbol id="icon-chart" viewBox="0 0 24 24"><path d="M3 3V21H21V19H5V3H3ZM19 13.5L14 8.5L10 12.5L6 8.5V11.5L10 15.5L14 11.5L19 16.5V13.5Z"/></symbol>
+        <symbol id="icon-gear" viewBox="0 0 24 24"><path d="M19.14 12.94C19.18 12.63 19.2 12.32 19.2 12C19.2 11.68 19.18 11.37 19.14 11.06L21.16 9.48C21.34 9.34 21.39 9.08 21.28 8.88L19.36 5.56C19.25 5.35 19 5.28 18.8 5.34L16.42 6.3C15.92 5.92 15.39 5.6 14.82 5.36L14.46 2.82C14.43 2.59 14.23 2.4 14 2.4H10.16C9.93 2.4 9.73 2.59 9.7 2.82L9.34 5.36C8.77 5.6 8.24 5.92 7.74 6.3L5.36 5.34C5.16 5.26 4.91 5.33 4.8 5.54L2.88 8.86C2.77 9.07 2.82 9.32 3 9.48L5.02 11.06C4.98 11.37 4.96 11.68 4.96 12C4.96 12.32 4.98 12.63 5.02 12.94L3 14.52C2.82 14.66 2.77 14.92 2.88 15.12L4.8 18.44C4.91 18.65 5.16 18.72 5.36 18.66L7.74 17.7C8.24 18.08 8.77 18.4 9.34 18.64L9.7 21.18C9.73 21.41 9.93 21.6 10.16 21.6H14C14.23 21.6 14.43 21.41 14.46 21.18L14.82 18.64C15.39 18.4 15.92 18.08 16.42 17.7L18.8 18.66C19 18.74 19.25 18.67 19.36 18.46L21.28 15.14C21.39 14.93 21.34 14.68 21.16 14.52L19.14 12.94ZM12 15.6C10.02 15.6 8.4 13.98 8.4 12C8.4 10.02 10.02 8.4 12 8.4C13.98 8.4 15.6 10.02 15.6 12C15.6 13.98 13.98 15.6 12 15.6Z"/></symbol>
+        <symbol id="icon-door" viewBox="0 0 24 24"><path d="M17 7L15.59 8.41L18.17 11H8V13H18.17L15.59 15.58L17 17L22 12L17 7ZM4 5H12V3H4C2.9 3 2 3.9 2 5V19C2 20.1 2.9 21 4 21H12V19H4V5Z"/></symbol>
+        <symbol id="icon-lock" viewBox="0 0 24 24"><path d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM9 6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9V6ZM12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17Z"/></symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z"/></symbol>
+        <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z"/></symbol>
+        <symbol id="icon-pin" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z"/></symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24"><path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M3 18H21V16H3V18ZM3 13H21V11H3V13ZM3 6V8H21V6H3Z"/></symbol>
+        <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/></symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24"><path d="M19 9H15V3H9V9H5L12 16L19 9ZM5 18V20H19V18H5Z"/></symbol>
+        <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z"/></symbol>
+        <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"/></symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/></symbol>
+        <symbol id="icon-warning" viewBox="0 0 24 24"><path d="M1 21H23L12 2L1 21ZM13 18H11V16H13V18ZM13 14H11V10H13V14Z"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"/></symbol>
+        <symbol id="icon-thermometer" viewBox="0 0 24 24"><path d="M15 13V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V13C6.61 14.65 5.57 17.75 6.84 20.35C8.11 22.95 11.16 23.95 13.71 22.62C16.26 21.29 17.17 18.23 15 16C15 15.65 15 15.3 15 13ZM12 11V5C12 4.45 12.45 4 13 4C13.55 4 14 4.45 14 5V11H12Z"/></symbol>
+        <symbol id="icon-soil" viewBox="0 0 24 24"><path d="M12 2L4 5V11C4 16.55 7.38 21.74 12 23C16.62 21.74 20 16.55 20 11V5L12 2ZM12 10C10.9 10 10 9.1 10 8C10 6.9 10.9 6 12 6C13.1 6 14 6.9 14 8C14 9.1 13.1 10 12 10ZM14 16H10V14H14V16Z"/></symbol>
+        <symbol id="icon-phone" viewBox="0 0 24 24"><path d="M6.62 10.79C8.06 13.62 10.38 15.94 13.21 17.38L15.41 15.18C15.69 14.9 16.08 14.82 16.43 14.93C17.55 15.3 18.75 15.5 20 15.5C20.55 15.5 21 15.95 21 16.5V20C21 20.55 20.55 21 20 21C10.61 21 3 13.39 3 4C3 3.45 3.45 3 4 3H7.5C8.05 3 8.5 3.45 8.5 4C8.5 5.25 8.7 6.45 9.07 7.57C9.18 7.92 9.1 8.31 8.82 8.59L6.62 10.79Z"/></symbol>
+    </svg>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- OVERLAY & MODAL -->
+    <div id="overlay" class="overlay"></div>
+    <div id="confirm-modal" class="modal">
+        <div class="modal-icon">
+            <svg class="svg-icon"><use href="#icon-warning"></use></svg>
+        </div>
+        <h3 id="modal-title" class="modal-title">Are you sure?</h3>
+        <p id="modal-msg" class="modal-msg">This action cannot be undone.</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="modal-cancel">Cancel</button>
+            <button class="btn btn-danger" id="modal-confirm">Confirm</button>
+        </div>
+    </div>
+
+    <!-- DRAWER SYSTEM (Reusable) -->
+    <div id="app-drawer" class="drawer">
+        <div class="drawer-header">
+            <h2 id="drawer-title">Add Record</h2>
+            <button class="btn-icon-circle" id="drawer-close"><svg class="svg-icon"><use href="#icon-close"></use></svg></button>
+        </div>
+        <div class="drawer-body" id="drawer-body">
+            <!-- Content injected dynamically -->
+        </div>
+        <div class="drawer-footer" id="drawer-footer">
+            <button class="btn btn-outline" id="drawer-cancel">Cancel</button>
+            <button class="btn btn-primary" id="drawer-save">Save</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app">
+
+        <!-- ================= PAGE: LOGIN ================= -->
+        <div id="login-page" class="page active">
+            <div class="login-split">
+                <div class="login-left">
+                    <div class="login-illustration">
+                        <!-- SVG Animation Container -->
+                        <svg width="300" height="300" viewBox="0 0 300 300">
+                            <circle cx="240" cy="60" r="30" fill="var(--harvest-gold)" class="anim-sun" />
+                            <path d="M 50 250 Q 75 150 100 250" stroke="var(--mint-green)" stroke-width="4" fill="none" class="anim-wheat" />
+                            <path d="M 100 250 Q 125 100 150 250" stroke="var(--mint-green)" stroke-width="4" fill="none" class="anim-wheat" style="animation-delay: 0.5s;" />
+                            <path d="M 150 250 Q 175 120 200 250" stroke="var(--mint-green)" stroke-width="4" fill="none" class="anim-wheat" style="animation-delay: 1s;" />
+                            <path d="M 200 250 Q 225 160 250 250" stroke="var(--mint-green)" stroke-width="4" fill="none" class="anim-wheat" style="animation-delay: 1.5s;" />
+                            <!-- Droplets -->
+                            <circle cx="80" cy="200" r="4" fill="#4facfe" class="anim-drop" />
+                            <circle cx="160" cy="220" r="5" fill="#4facfe" class="anim-drop" style="animation-delay: 1s;" />
+                            <circle cx="220" cy="180" r="3" fill="#4facfe" class="anim-drop" style="animation-delay: 2s;" />
+                            <rect x="0" y="250" width="300" height="50" fill="var(--primary-forest-dark)" />
+                        </svg>
+                    </div>
+                    <h1 class="login-tagline">Growing Smarter,<br>Farming Better.</h1>
+                    <p class="login-subtagline">Your Digital Farm Companion for Modern Agriculture</p>
+                    <div class="login-features">
+                        <div class="feature-badge stagger-3 animate-up">
+                            <svg class="svg-icon text-mint"><use href="#icon-waves"></use></svg> Real-Time Monitoring
+                        </div>
+                        <div class="feature-badge stagger-6 animate-up">
+                            <svg class="svg-icon text-mint"><use href="#icon-water"></use></svg> Smart Irrigation
+                        </div>
+                        <div class="feature-badge stagger-8 animate-up">
+                            <svg class="svg-icon text-mint"><use href="#icon-chart"></use></svg> Predictive Analytics
+                        </div>
+                    </div>
+                </div>
+                <div class="login-right">
+                    <div class="login-card" id="login-card">
+                        <div class="login-logo">
+                            <svg class="svg-icon"><use href="#icon-leaf"></use></svg>
+                            <h1>Smart Kisan</h1>
+                        </div>
+                        <p class="login-welcome">Welcome back! Sign in to your farm dashboard.</p>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <svg class="svg-icon form-icon"><use href="#icon-farmer"></use></svg>
+                            <input type="text" class="form-control" id="login-user" placeholder="Enter your username (admin)">
+                            <div class="error-text" id="err-user">Username is required</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <svg class="svg-icon form-icon"><use href="#icon-lock"></use></svg>
+                            <input type="password" class="form-control" id="login-pass" placeholder="Enter your password (admin123)">
+                            <svg class="svg-icon form-icon" style="left: auto; right: 12px; cursor: pointer;" onclick="togglePassword()"><use href="#icon-eye"></use></svg>
+                            <div class="error-text" id="err-pass">Incorrect password</div>
+                        </div>
+
+                        <div class="login-options">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" style="accent-color: var(--mint-green);"> Remember me
+                            </label>
+                            <a href="#">Forgot Password?</a>
+                        </div>
+
+                        <button class="btn btn-primary login-btn" onclick="handleLogin()">
+                            <span id="login-text">Sign In</span>
+                            <div class="spinner" id="login-spinner"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= APP SHELL (SIDEBAR + CONTENT) ================= -->
+        <div id="app-shell">
+            
+            <!-- SIDEBAR -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <svg class="svg-icon"><use href="#icon-leaf"></use></svg>
+                    <h2>Smart Kisan</h2>
+                </div>
+                <div class="sidebar-divider"></div>
+                <nav class="sidebar-nav">
+                    <a href="#dashboard" class="nav-link active" onclick="navigate('dashboard')">
+                        <svg class="svg-icon"><use href="#icon-home"></use></svg> Dashboard
+                    </a>
+                    <a href="#farmers" class="nav-link" onclick="navigate('farmers')">
+                        <svg class="svg-icon"><use href="#icon-farmer"></use></svg> Farmer Management
+                    </a>
+                    <a href="#crops" class="nav-link" onclick="navigate('crops')">
+                        <svg class="svg-icon"><use href="#icon-seedling"></use></svg> Crop Management
+                    </a>
+                    <a href="#sensors" class="nav-link" onclick="navigate('sensors')">
+                        <svg class="svg-icon"><use href="#icon-waves"></use></svg> Sensor Data
+                    </a>
+                    <a href="#irrigation" class="nav-link" onclick="navigate('irrigation')">
+                        <svg class="svg-icon"><use href="#icon-water"></use></svg> Irrigation System
+                    </a>
+                    <a href="#analytics" class="nav-link" onclick="navigate('analytics')">
+                        <svg class="svg-icon"><use href="#icon-chart"></use></svg> Analytics & Logs
+                    </a>
+                    <div class="sidebar-divider" style="margin: 16px 24px;"></div>
+                    <a href="#" class="nav-link">
+                        <svg class="svg-icon"><use href="#icon-gear"></use></svg> Settings
+                    </a>
+                    <a href="#" class="nav-link" onclick="logout()">
+                        <svg class="svg-icon"><use href="#icon-door"></use></svg> Logout
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="user-profile-card">
+                        <div class="user-avatar">AU</div>
+                        <div class="user-info">
+                            <h4>Admin User</h4>
+                            <p>Administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <div class="main-content">
+                
+                <!-- TOP HEADER -->
+                <header class="top-header">
+                    <div class="header-left">
+                        <button class="hamburger" onclick="toggleSidebar()">
+                            <svg class="svg-icon"><use href="#icon-menu"></use></svg>
+                        </button>
+                        <div class="greeting" id="top-greeting">Good Morning, Admin ☀️</div>
+                    </div>
+                    <div class="header-center" id="top-date">Monday, 15 April 2025</div>
+                    <div class="header-right">
+                        <button class="icon-btn">
+                            <svg class="svg-icon"><use href="#icon-search"></use></svg>
+                        </button>
+                        <button class="icon-btn">
+                            <svg class="svg-icon"><use href="#icon-pin"></use></svg>
+                        </button>
+                        <button class="icon-btn">
+                            <svg class="svg-icon"><use href="#icon-bell"></use></svg>
+                            <span class="badge-dot"></span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- SCROLLABLE WRAPPER -->
+                <div class="content-wrapper" id="content-area">
+                    
+                    <!-- PAGE: DASHBOARD -->
+                    <div id="dashboard-page" class="page">
+                        <div class="page-header stagger-1 animate-up">
+                            <h1 class="page-title">Farm Overview</h1>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card card card-xl stagger-2 animate-up">
+                                <svg class="svg-icon stat-icon"><use href="#icon-farmer"></use></svg>
+                                <div class="stat-label">Farmers</div>
+                                <div class="stat-value" data-val="1247">0</div>
+                                <div class="stat-trend trend-up">▲ +8 today</div>
+                            </div>
+                            <div class="stat-card card card-xl stagger-3 animate-up">
+                                <svg class="svg-icon stat-icon"><use href="#icon-seedling"></use></svg>
+                                <div class="stat-label">Crops</div>
+                                <div class="stat-value" data-val="84">0</div>
+                                <div class="stat-trend trend-up">▲ +3 new</div>
+                            </div>
+                            <div class="stat-card card card-xl stagger-4 animate-up">
+                                <svg class="svg-icon stat-icon"><use href="#icon-waves"></use></svg>
+                                <div class="stat-label">Sensor Readings</div>
+                                <div class="stat-value" data-val="5890">0</div>
+                                <div class="stat-trend text-mint">● Live Data</div>
+                            </div>
+                            <div class="stat-card card card-xl stagger-5 animate-up">
+                                <svg class="svg-icon stat-icon"><use href="#icon-water"></use></svg>
+                                <div class="stat-label">Irrigation Zones</div>
+                                <div class="stat-value" data-val="42">0</div>
+                                <div class="stat-trend text-mint">23 Active</div>
+                            </div>
+                            <div class="stat-card card card-xl stagger-6 animate-up">
+                                <svg class="svg-icon stat-icon"><use href="#icon-chart"></use></svg>
+                                <div class="stat-label">System Logs</div>
+                                <div class="stat-value" data-val="316">0</div>
+                                <div class="stat-trend trend-up">▲ 47 today</div>
+                            </div>
+                        </div>
+
+                        <div class="live-sensors-grid stagger-7 animate-up">
+                            <div class="live-sensor-card card">
+                                <div class="stat-label">Temperature</div>
+                                <div class="sensor-value-large text-primary"><span id="dash-temp">32</span>°C</div>
+                                <div class="sensor-bar-bg"><div class="sensor-bar-fill" id="dash-temp-bar" style="width: 50%;"></div></div>
+                                <div class="badge badge-success" id="dash-temp-status">Normal</div>
+                            </div>
+                            <div class="live-sensor-card card">
+                                <div class="stat-label">Humidity</div>
+                                <div class="sensor-value-large text-primary"><span id="dash-hum">65</span>%</div>
+                                <div class="sensor-bar-bg"><div class="sensor-bar-fill" id="dash-hum-bar" style="width: 65%; background: linear-gradient(90deg, #4facfe, #00f2fe);"></div></div>
+                                <div class="badge badge-success" id="dash-hum-status">Normal</div>
+                            </div>
+                            <div class="live-sensor-card card">
+                                <div class="stat-label">Soil Moisture</div>
+                                <div class="sensor-value-large text-primary"><span id="dash-soil">45</span>%</div>
+                                <div class="sensor-bar-bg"><div class="sensor-bar-fill" id="dash-soil-bar" style="width: 45%; background: linear-gradient(90deg, #d4a574, #8B5E3C);"></div></div>
+                                <div class="badge badge-success" id="dash-soil-status">Normal</div>
+                            </div>
+                        </div>
+
+                        <div class="activity-feed stagger-8 animate-up">
+                            <h3 class="activity-feed-title">Recent Activity Feed</h3>
+                            <div class="activity-list" id="activity-feed-list">
+                                <!-- JS injected -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAGE: FARMERS -->
+                    <div id="farmers-page" class="page">
+                        <div class="page-header animate-up stagger-1">
+                            <h1 class="page-title"><svg class="svg-icon"><use href="#icon-farmer"></use></svg> Farmer Management</h1>
+                            <div class="breadcrumb">Dashboard <span>→</span> Farmers</div>
+                            <div style="margin-top: 12px; display:flex; gap:16px;">
+                                <span class="badge badge-info">Total: 10</span>
+                                <span class="badge badge-success">Active: 9</span>
+                                <span class="badge badge-neutral">Inactive: 1</span>
+                            </div>
+                        </div>
+
+                        <div class="action-bar animate-up stagger-2">
+                            <div class="action-left">
+                                <div class="form-group" style="margin:0; width: 300px;">
+                                    <svg class="svg-icon form-icon" style="top:12px;"><use href="#icon-search"></use></svg>
+                                    <input type="text" class="form-control" id="search-farmer" placeholder="Search farmers..." onkeyup="renderFarmersTable()">
+                                </div>
+                                <select class="form-control" style="width: 150px; padding-left: 16px;" id="filter-farmer" onchange="renderFarmersTable()">
+                                    <option value="all">All Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div style="display:flex; gap:12px;">
+                                <button class="btn btn-outline"><svg class="svg-icon"><use href="#icon-download"></use></svg> Export CSV</button>
+                                <button class="btn btn-primary" onclick="openFarmerDrawer()"><svg class="svg-icon"><use href="#icon-plus"></use></svg> Add New Farmer</button>
+                            </div>
+                        </div>
+
+                        <div class="table-container animate-up stagger-3">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Full Name</th>
+                                        <th>Phone Number</th>
+                                        <th>Village</th>
+                                        <th>Land (Acres)</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="farmers-tbody">
+                                    <!-- JS injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PAGE: CROPS -->
+                    <div id="crops-page" class="page">
+                        <div class="page-header animate-up stagger-1">
+                            <h1 class="page-title"><svg class="svg-icon"><use href="#icon-seedling"></use></svg> Crop Management</h1>
+                            <div class="season-tabs" style="margin-top:16px;">
+                                <div class="season-tab active">Kharif Season</div>
+                                <div class="season-tab">Rabi Season</div>
+                                <div class="season-tab">Zaid Season</div>
+                            </div>
+                        </div>
+
+                        <div class="action-bar animate-up stagger-2">
+                            <div class="action-left">
+                                <div class="form-group" style="margin:0; width: 300px;">
+                                    <svg class="svg-icon form-icon" style="top:12px;"><use href="#icon-search"></use></svg>
+                                    <input type="text" class="form-control" placeholder="Search crops...">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="openCropDrawer()"><svg class="svg-icon"><use href="#icon-plus"></use></svg> Add New Crop</button>
+                        </div>
+
+                        <div class="table-container animate-up stagger-3">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Crop Name</th>
+                                        <th>Type</th>
+                                        <th>Farmer</th>
+                                        <th>Harvest Date</th>
+                                        <th>Growth Stage</th>
+                                        <th>Health</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="crops-tbody">
+                                    <!-- JS injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PAGE: SENSORS (CROWN JEWEL) -->
+                    <div id="sensors-page" class="page">
+                        <div class="live-status-bar animate-up stagger-1">
+                            <div class="live-indicator">
+                                <div class="pulse-dot"></div>
+                                <span style="font-weight:600; font-family:var(--font-mono)">Live Sensor Feed — Updating every 5 seconds</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:16px;">
+                                <span class="text-mono" style="font-size:12px; opacity:0.8" id="sensor-last-update">Last update: Just now</span>
+                                <button class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3); padding: 6px 12px;">Pause</button>
+                            </div>
+                        </div>
+
+                        <div class="hero-sensors animate-up stagger-2">
+                            <!-- Temp -->
+                            <div class="hero-card temp" id="hc-temp">
+                                <div class="stat-label">Temperature Average</div>
+                                <svg class="svg-icon hero-icon text-primary"><use href="#icon-thermometer"></use></svg>
+                                <div class="hero-value" id="hv-temp">32<span class="hero-unit">°C</span></div>
+                                <div class="circular-progress">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
+                                        <circle class="circle-fill" id="hr-temp" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="100"></circle>
+                                    </svg>
+                                    <div class="circular-content">
+                                        <div class="badge badge-success" id="hb-temp">Normal</div>
+                                    </div>
+                                </div>
+                                <div class="text-muted text-mono" style="font-size:12px; margin-top:10px;">Min: 22° | Max: 35°</div>
+                            </div>
+                            <!-- Hum -->
+                            <div class="hero-card hum" id="hc-hum">
+                                <div class="stat-label">Humidity Average</div>
+                                <svg class="svg-icon hero-icon" style="color:#4facfe;"><use href="#icon-waves"></use></svg>
+                                <div class="hero-value" id="hv-hum">65<span class="hero-unit">%</span></div>
+                                <div class="circular-progress">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
+                                        <circle class="circle-fill" id="hr-hum" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="80" style="stroke:#4facfe;"></circle>
+                                    </svg>
+                                    <div class="circular-content">
+                                        <div class="badge badge-success" id="hb-hum">Normal</div>
+                                    </div>
+                                </div>
+                                <div class="text-muted text-mono" style="font-size:12px; margin-top:10px;">Min: 40% | Max: 80%</div>
+                            </div>
+                            <!-- Soil -->
+                            <div class="hero-card soil" id="hc-soil">
+                                <div class="stat-label">Soil Moisture Avg</div>
+                                <svg class="svg-icon hero-icon text-mint"><use href="#icon-soil"></use></svg>
+                                <div class="hero-value" id="hv-soil">45<span class="hero-unit">%</span></div>
+                                <div class="circular-progress">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
+                                        <circle class="circle-fill" id="hr-soil" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="120" style="stroke:var(--earth-brown);"></circle>
+                                    </svg>
+                                    <div class="circular-content">
+                                        <div class="badge badge-success" id="hb-soil">Normal</div>
+                                    </div>
+                                </div>
+                                <div class="text-muted text-mono" style="font-size:12px; margin-top:10px;">Min: 30% | Max: 60%</div>
+                            </div>
+                        </div>
+
+                        <div class="alert-strip animate-up stagger-3" id="sensor-alerts">
+                            <!-- JS injected -->
+                        </div>
+
+                        <div class="table-container animate-up stagger-4">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data ID</th>
+                                        <th>Sensor ID</th>
+                                        <th>Temp (°C)</th>
+                                        <th>Hum (%)</th>
+                                        <th>Soil (%)</th>
+                                        <th>Timestamp</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sensors-tbody">
+                                    <!-- JS injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="sparklines-grid animate-up stagger-5" style="margin-top: 32px;">
+                            <div class="card"><div class="stat-label">SN-014 Trend</div><canvas id="spark1" height="80"></canvas></div>
+                            <div class="card"><div class="stat-label">SN-015 Trend</div><canvas id="spark2" height="80"></canvas></div>
+                            <div class="card"><div class="stat-label">SN-016 Trend</div><canvas id="spark3" height="80"></canvas></div>
+                            <div class="card"><div class="stat-label">SN-017 Trend</div><canvas id="spark4" height="80"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- PAGE: IRRIGATION -->
+                    <div id="irrigation-page" class="page">
+                        <div class="page-header animate-up stagger-1">
+                            <h1 class="page-title"><svg class="svg-icon"><use href="#icon-water"></use></svg> Irrigation System</h1>
+                        </div>
+                        
+                        <div class="stats-grid animate-up stagger-2" style="grid-template-columns: repeat(3, 1fr);">
+                            <div class="stat-card card">
+                                <div class="stat-label">Active Zones</div>
+                                <div class="stat-value">3 / 6</div>
+                                <div style="display:flex; gap:4px; margin-top:8px;">
+                                    <div class="activity-dot" style="background:var(--emerald-success)"></div>
+                                    <div class="activity-dot" style="background:#e0e0e0"></div>
+                                    <div class="activity-dot" style="background:var(--emerald-success)"></div>
+                                    <div class="activity-dot" style="background:var(--emerald-success)"></div>
+                                    <div class="activity-dot" style="background:#e0e0e0"></div>
+                                </div>
+                            </div>
+                            <div class="stat-card card">
+                                <div class="stat-label">Water Used Today</div>
+                                <div class="stat-value">12,450 L</div>
+                                <div class="stat-trend text-muted">vs 11,200 L yesterday</div>
+                            </div>
+                            <div class="stat-card card">
+                                <div class="stat-label">Next Scheduled</div>
+                                <div class="stat-value" style="font-size:24px;">Zone B</div>
+                                <div class="stat-trend text-primary">Today at 18:00 PM</div>
+                            </div>
+                        </div>
+
+                        <div class="irrigation-grid animate-up stagger-3" id="irrigation-grid">
+                            <!-- JS injected -->
+                        </div>
+
+                        <div class="card animate-up stagger-4" style="margin-top:32px;">
+                            <h3 style="margin-bottom:20px;">Weekly Schedule</h3>
+                            <div class="schedule-grid">
+                                <div class="schedule-cell schedule-header">Time</div>
+                                <div class="schedule-cell schedule-header">Mon</div>
+                                <div class="schedule-cell schedule-header">Tue</div>
+                                <div class="schedule-cell schedule-header">Wed</div>
+                                <div class="schedule-cell schedule-header">Thu</div>
+                                <div class="schedule-cell schedule-header">Fri</div>
+                                <div class="schedule-cell schedule-header">Sat</div>
+                                <div class="schedule-cell schedule-header">Sun</div>
+
+                                <div class="schedule-cell schedule-header">06:00 AM</div>
+                                <div class="schedule-cell schedule-active">Zone A, B</div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell schedule-active">Zone A</div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell schedule-active">Zone C</div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell"></div>
+
+                                <div class="schedule-cell schedule-header">12:00 PM</div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell schedule-active">Zone D</div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell schedule-active">Zone E</div>
+                                <div class="schedule-cell"></div>
+
+                                <div class="schedule-cell schedule-header">18:00 PM</div>
+                                <div class="schedule-cell schedule-active">Zone C</div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell schedule-active">Zone B</div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell"></div>
+                                <div class="schedule-cell schedule-active">Zone A</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAGE: ANALYTICS -->
+                    <div id="analytics-page" class="page">
+                        <div class="page-header animate-up stagger-1">
+                            <h1 class="page-title"><svg class="svg-icon"><use href="#icon-chart"></use></svg> Analytics & Logs</h1>
+                        </div>
+
+                        <div class="charts-grid animate-up stagger-2">
+                            <div class="chart-card">
+                                <h3>Temperature Trend — Last 7 Days</h3>
+                                <div class="chart-container"><canvas id="chart-temp"></canvas></div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Crop Health Distribution</h3>
+                                <div class="chart-container"><canvas id="chart-health"></canvas></div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Water Usage by Zone</h3>
+                                <div class="chart-container"><canvas id="chart-water"></canvas></div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Sensor Alert Frequency</h3>
+                                <div class="chart-container"><canvas id="chart-alerts"></canvas></div>
+                            </div>
+                        </div>
+
+                        <div class="card animate-up stagger-3" style="margin-top:32px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                                <h3>System Activity Logs</h3>
+                                <div style="display:flex; gap:12px;">
+                                    <select class="form-control" style="width:150px; padding:8px 12px;"><option>All Modules</option></select>
+                                    <select class="form-control" style="width:150px; padding:8px 12px;"><option>All Status</option></select>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>Module</th>
+                                            <th>Action</th>
+                                            <th>Triggered By</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="logs-tbody">
+                                        <!-- JS injected -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- End content-wrapper -->
+            </div> <!-- End main-content -->
+        </div> <!-- End app-shell -->
+    </div> <!-- End app -->
+
+    <script>
+        /* =========================================
+           1. CORE STATE & UTILS
+        ========================================= */
+        const USE_MOCK_DATA = true;
+        let sensorInterval;
+        
+        // Utils
+        const $ = id => document.getElementById(id);
+        const formatTime = date => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const formatDate = date => date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        const formatDateTime = date => `${formatDate(date)} ${formatTime(date)}`;
+
+        // Initialization
+        window.onload = async () => {
+            initClock();
+            // Start at login
+            if(window.location.hash) {
+                if(window.location.hash !== '#login') {
+                    $('app-shell').style.display = 'flex';
+                    $('login-page').classList.remove('active');
+                    await fetchAllData();
+                }
+                navigate(window.location.hash.substring(1));
+            }
+        };
+
+        function initClock() {
+            const now = new Date();
+            const hour = now.getHours();
+            let greeting = "Good Morning";
+            let emoji = "☀️";
+            if (hour >= 12 && hour < 18) { greeting = "Good Afternoon"; emoji = "🌤️"; }
+            else if (hour >= 18) { greeting = "Good Evening"; emoji = "🌙"; }
+            
+            if($('top-greeting')) $('top-greeting').innerText = `${greeting}, Admin Ramesh ${emoji}`;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            if($('top-date')) $('top-date').innerText = now.toLocaleDateString('en-US', options);
+        }
+
+        /* =========================================
+           2. ROUTING & NAVIGATION
+        ========================================= */
+        function navigate(pageId) {
+            if(pageId === 'login') {
+                logout();
+                return;
+            }
+            
+            window.location.hash = pageId;
+            
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => {
+                if(p.classList.contains('active')) {
+                    p.classList.remove('active');
+                    p.classList.add('outgoing');
+                    setTimeout(() => { p.classList.remove('outgoing'); }, 150);
+                }
+            });
+            
+            // Show target
+            setTimeout(() => {
+                const target = $(pageId + '-page');
+                if(target) target.classList.add('active');
+                
+                // Trigger page specific logic
+                if(pageId === 'dashboard') initDashboard();
+                if(pageId === 'farmers') renderFarmersTable();
+                if(pageId === 'crops') renderCropsTable();
+                if(pageId === 'sensors') initSensors();
+                if(pageId === 'irrigation') renderIrrigation();
+                if(pageId === 'analytics') initAnalytics();
+            }, 150);
+
+            // Update sidebar active state
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const activeLink = document.querySelector(`.nav-link[href="#${pageId}"]`);
+            if(activeLink) activeLink.classList.add('active');
+            
+            // Close mobile sidebar if open
+            if(window.innerWidth <= 768 && $('sidebar').classList.contains('active')) {
+                toggleSidebar();
+            }
+        }
+
+        function toggleSidebar() {
+            $('sidebar').classList.toggle('active');
+        }
+
+        /* =========================================
+           3. AUTHENTICATION
+        ========================================= */
+        function togglePassword() {
+            const input = $('login-pass');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function handleLogin() {
+            const user = $('login-user').value;
+            const pass = $('login-pass').value;
+            let valid = true;
+
+            $('err-user').style.display = 'none';
+            $('err-pass').style.display = 'none';
+
+            if(user !== 'admin') { $('err-user').style.display = 'block'; valid = false; }
+            if(pass !== 'admin123') { $('err-pass').style.display = 'block'; valid = false; }
+
+            if(!valid) {
+                $('login-card').style.animation = 'none';
+                void $('login-card').offsetWidth; // trigger reflow
+                $('login-card').style.animation = 'shake 0.5s ease';
+                return;
+            }
+
+            $('login-text').style.display = 'none';
+            $('login-spinner').style.display = 'block';
+
+            setTimeout(async () => {
+                $('login-spinner').style.display = 'none';
+                $('login-text').style.display = 'block';
+                
+                $('login-page').classList.remove('active');
+                $('login-page').classList.add('outgoing');
+                
+                await fetchAllData();
+                
+                setTimeout(() => {
+                    $('app-shell').style.display = 'flex';
+                    navigate('dashboard');
+                    showToast('Welcome back, Admin Ramesh!', 'success');
+                }, 150);
+            }, 1500);
+        }
+
+        function logout() {
+            $('app-shell').style.display = 'none';
+            $('login-page').classList.remove('outgoing');
+            $('login-page').classList.add('active');
+            $('login-user').value = '';
+            $('login-pass').value = '';
+            window.location.hash = '';
+            if(sensorInterval) clearInterval(sensorInterval);
+        }
+
+        /* =========================================
+           4. DATABASE INTEGRATION
+        ========================================= */
+        let DB = { farmers: [], crops: [], zones: [], logs: [] };
+
+        async function fetchAllData() {
+            try {
+                const [fRes, cRes, zRes, lRes] = await Promise.all([
+                    fetch('http://127.0.0.1:5000/api/farmers').catch(() => ({ok: false})),
+                    fetch('http://127.0.0.1:5000/api/crops').catch(() => ({ok: false})),
+                    fetch('http://127.0.0.1:5000/api/irrigation').catch(() => ({ok: false})),
+                    fetch('http://127.0.0.1:5000/api/logs').catch(() => ({ok: false}))
+                ]);
+
+                if(fRes.ok) DB.farmers = await fRes.json();
+                if(cRes.ok) DB.crops = await cRes.json();
+                if(zRes.ok) DB.zones = await zRes.json();
+                if(lRes.ok) {
+                    const rawLogs = await lRes.json();
+                    DB.logs = rawLogs.map(l => ({...l, time: new Date(l.time)}));
+                }
+
+                renderRecentActivity();
+            } catch (err) {
+                console.error("Failed to fetch data", err);
+            }
+        }
+
+        function renderRecentActivity() {
+            if(!DB.logs.length) return;
+            const activities = DB.logs.map(l => `
+                <div class="activity-item">
+                    <div class="activity-dot" style="background: ${l.status==='Critical'?'var(--coral-alert)':l.status==='Warning'?'var(--amber-warning)':'var(--emerald-success)'}"></div>
+                    <div class="activity-text">${l.text}</div>
+                    <div class="activity-time">${formatTime(l.time)}</div>
+                </div>
+            `).join('');
+            if($('activity-feed-list')) $('activity-feed-list').innerHTML = activities;
+        }
+
+        /* =========================================
+           5. UI COMPONENTS (Toasts, Modals, Drawers)
+        ========================================= */
+        function showToast(message, type = 'success') {
+            const container = $('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '#icon-check' : type === 'error' ? '#icon-close' : '#icon-warning';
+            toast.innerHTML = `
+                <div class="btn-icon-circle ${type === 'error' ? 'danger' : ''}" style="width:24px;height:24px;border:none;background:var(--sage-bg)"><svg class="svg-icon" style="width:14px;height:14px"><use href="${icon}"></use></svg></div>
+                <div style="font-size:14px;font-weight:500;">${message}</div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        let currentConfirmCallback = null;
+        function showConfirmModal(title, msg, onConfirm) {
+            $('modal-title').innerText = title;
+            $('modal-msg').innerText = msg;
+            currentConfirmCallback = onConfirm;
+            $('overlay').classList.add('active');
+            $('confirm-modal').classList.add('active');
+        }
+
+        $('modal-cancel').onclick = closeConfirmModal;
+        $('modal-confirm').onclick = () => {
+            if(currentConfirmCallback) currentConfirmCallback();
+            closeConfirmModal();
+        };
+
+        function closeConfirmModal() {
+            $('confirm-modal').classList.remove('active');
+            $('overlay').classList.remove('active');
+            currentConfirmCallback = null;
+        }
+
+        function closeDrawer() {
+            $('app-drawer').classList.remove('active');
+            $('overlay').classList.remove('active');
+        }
+        $('drawer-close').onclick = closeDrawer;
+        $('drawer-cancel').onclick = closeDrawer;
+        $('overlay').onclick = () => { closeDrawer(); closeConfirmModal(); };
+
+        // Escape key closes modals/drawers
+        document.addEventListener('keydown', e => {
+            if(e.key === 'Escape') {
+                closeDrawer();
+                closeConfirmModal();
+            }
+        });
+
+        /* =========================================
+           6. PAGE: DASHBOARD LOGIC
+        ========================================= */
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Ease out cubic
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                obj.innerHTML = Math.floor(easeOut * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end;
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function initDashboard() {
+            // Animate counters
+            document.querySelectorAll('.stat-value').forEach(el => {
+                const finalVal = parseInt(el.getAttribute('data-val'));
+                animateValue(el, 0, finalVal, 2000);
+            });
+            // Start dashboard mini-sensors
+            updateDashSensors();
+            if(!sensorInterval) sensorInterval = setInterval(updateAllSensors, 5000);
+        }
+
+        function updateDashSensors() {
+            // Sim temp 28-42
+            const t = Math.floor(Math.random() * (42 - 28 + 1) + 28);
+            $('dash-temp').innerText = t;
+            $('dash-temp').style.animation = 'none'; void $('dash-temp').offsetWidth; $('dash-temp').style.animation = 'flipCounter 0.5s';
+            $('dash-temp-bar').style.width = `${(t/50)*100}%`;
+            $('dash-temp-status').className = 'badge ' + (t>40?'badge-danger':t>35?'badge-warning':'badge-success');
+            $('dash-temp-status').innerText = t>40?'Critical':t>35?'Caution':'Normal';
+
+            // Sim hum 40-90
+            const h = Math.floor(Math.random() * (90 - 40 + 1) + 40);
+            $('dash-hum').innerText = h;
+            $('dash-hum').style.animation = 'none'; void $('dash-hum').offsetWidth; $('dash-hum').style.animation = 'flipCounter 0.5s';
+            $('dash-hum-bar').style.width = `${h}%`;
+            $('dash-hum-status').className = 'badge ' + (h>80?'badge-warning':'badge-success');
+            $('dash-hum-status').innerText = h>80?'Caution':'Normal';
+
+            // Sim soil 15-80
+            const s = Math.floor(Math.random() * (80 - 15 + 1) + 15);
+            $('dash-soil').innerText = s;
+            $('dash-soil').style.animation = 'none'; void $('dash-soil').offsetWidth; $('dash-soil').style.animation = 'flipCounter 0.5s';
+            $('dash-soil-bar').style.width = `${s}%`;
+            $('dash-soil-status').className = 'badge ' + (s<25?'badge-danger':s<40?'badge-warning':'badge-success');
+            $('dash-soil-status').innerText = s<25?'Critical':s<40?'Caution':'Normal';
+        }
+
+        /* =========================================
+           7. PAGE: FARMERS
+        ========================================= */
+        function renderFarmersTable() {
+            const tbody = $('farmers-tbody');
+            const search = $('search-farmer').value.toLowerCase();
+            const filter = $('filter-farmer').value;
+            
+            let html = '';
+            DB.farmers.forEach(f => {
+                if(filter !== 'all' && f.status !== filter) return;
+                if(search && !f.name.toLowerCase().includes(search) && !f.village.toLowerCase().includes(search)) return;
+                
+                const statusBadge = f.status === 'Active' ? 'badge-success' : 'badge-neutral';
+                html += `
+                    <tr>
+                        <td class="text-mono">${f.id}</td>
+                        <td style="font-weight:600">${f.name}</td>
+                        <td>${f.phone}</td>
+                        <td>${f.village}</td>
+                        <td>${f.land}</td>
+                        <td><span class="badge ${statusBadge}">${f.status}</span></td>
+                        <td class="td-actions">
+                            <button class="btn-icon-circle" onclick="editFarmer('${f.id}')"><svg class="svg-icon"><use href="#icon-edit"></use></svg></button>
+                            <button class="btn-icon-circle danger" onclick="deleteFarmer('${f.id}', '${f.name}')"><svg class="svg-icon"><use href="#icon-trash"></use></svg></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function deleteFarmer(id, name) {
+            showConfirmModal(
+                'Are you sure?', 
+                `You are about to permanently delete farmer ${name}. This action cannot be undone and will also remove all associated crop records.`,
+                () => {
+                    DB.farmers = DB.farmers.filter(f => f.id !== id);
+                    renderFarmersTable();
+                    showToast('Farmer deleted successfully', 'success');
+                }
+            );
+        }
+
+        function openFarmerDrawer() {
+            $('drawer-title').innerText = 'Add New Farmer';
+            $('drawer-body').innerHTML = `
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <svg class="svg-icon form-icon"><use href="#icon-farmer"></use></svg>
+                        <input type="text" class="form-control" id="frm-name">
+                        <div class="error-text" id="err-frm-name">Required field</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <svg class="svg-icon form-icon"><use href="#icon-phone"></use></svg>
+                        <input type="text" class="form-control" id="frm-phone">
+                        <div class="error-text" id="err-frm-phone">Required field</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Village</label>
+                        <svg class="svg-icon form-icon"><use href="#icon-pin"></use></svg>
+                        <input type="text" class="form-control" id="frm-village">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Land Area (Acres) *</label>
+                        <input type="number" class="form-control" id="frm-land" style="padding-left:16px;">
+                        <div class="error-text" id="err-frm-land">Required field</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Land Type</label>
+                    <div style="display:flex; gap:12px;">
+                        <label style="flex:1; border:1px solid var(--mint-mist); padding:12px; border-radius:8px; text-align:center; cursor:pointer;">
+                            <input type="radio" name="ltype" checked> Irrigated
+                        </label>
+                        <label style="flex:1; border:1px solid var(--mint-mist); padding:12px; border-radius:8px; text-align:center; cursor:pointer;">
+                            <input type="radio" name="ltype"> Rainfed
+                        </label>
+                        <label style="flex:1; border:1px solid var(--mint-mist); padding:12px; border-radius:8px; text-align:center; cursor:pointer;">
+                            <input type="radio" name="ltype"> Mixed
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Primary Crops</label>
+                    <div class="tags-input">
+                        <div class="tag">Wheat <span class="tag-remove">×</span></div>
+                        <div class="tag">Rice <span class="tag-remove">×</span></div>
+                        <input type="text" placeholder="Add crop...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" style="padding-left:16px; min-height:80px;"></textarea>
+                </div>
+            `;
+            
+            $('drawer-save').onclick = () => {
+                let valid = true;
+                ['name', 'phone', 'land'].forEach(f => {
+                    const el = $('frm-'+f);
+                    const err = $('err-frm-'+f);
+                    if(!el.value) { err.style.display = 'block'; el.style.borderColor = 'var(--coral-alert)'; valid = false; }
+                    else { err.style.display = 'none'; el.style.borderColor = 'var(--mint-mist)'; }
+                });
+                
+                if(valid) {
+                    const newId = 'FRM-0' + (DB.farmers.length + 1);
+                    DB.farmers.unshift({
+                        id: newId, name: $('frm-name').value, phone: $('frm-phone').value,
+                        village: $('frm-village').value, land: $('frm-land').value, status: 'Active'
+                    });
+                    renderFarmersTable();
+                    closeDrawer();
+                    showToast('Farmer added successfully', 'success');
+                } else {
+                    $('app-drawer').style.animation = 'none'; void $('app-drawer').offsetWidth;
+                    $('app-drawer').style.animation = 'shake 0.5s ease';
+                }
+            };
+            
+            $('overlay').classList.add('active');
+            $('app-drawer').classList.add('active');
+        }
+        
+        function editFarmer(id) {
+            openFarmerDrawer();
+            $('drawer-title').innerText = 'Edit Farmer ' + id;
+            const f = DB.farmers.find(x => x.id === id);
+            $('frm-name').value = f.name;
+            $('frm-phone').value = f.phone;
+            $('frm-village').value = f.village;
+            $('frm-land').value = f.land;
+            $('drawer-save').onclick = () => {
+                f.name = $('frm-name').value;
+                f.phone = $('frm-phone').value;
+                f.village = $('frm-village').value;
+                f.land = $('frm-land').value;
+                renderFarmersTable();
+                closeDrawer();
+                showToast('Farmer updated successfully', 'success');
+            }
+        }
+
+        /* =========================================
+           8. PAGE: CROPS
+        ========================================= */
+        function renderCropsTable() {
+            const tbody = $('crops-tbody');
+            let html = '';
+            DB.crops.forEach(c => {
+                let hb = 'badge-success';
+                if(c.health === 'At Risk') hb = 'badge-warning';
+                if(c.health === 'Critical') hb = 'badge-danger';
+                
+                let tb = 'badge-info';
+                if(c.type === 'Vegetable') tb = 'badge-success';
+                if(c.type === 'Cash Crop') tb = 'badge-warning';
+                
+                html += `
+                    <tr class="expandable-row" onclick="toggleRowDetail(this)">
+                        <td class="text-mono">${c.id}</td>
+                        <td style="font-weight:600">${c.name}</td>
+                        <td><span class="badge ${tb}">${c.type}</span></td>
+                        <td class="text-primary" style="text-decoration:underline">${c.farmer}</td>
+                        <td>${c.harvest}</td>
+                        <td>
+                            <div class="growth-stage-bar"><div class="growth-fill" style="width:${c.stage}%"></div></div>
+                            <span style="font-size:12px; margin-left:8px;">${c.stage}%</span>
+                        </td>
+                        <td><span class="badge ${hb}">${c.health}</span></td>
+                        <td class="td-actions">
+                            <button class="btn-icon-circle"><svg class="svg-icon"><use href="#icon-edit"></use></svg></button>
+                            <button class="btn-icon-circle danger"><svg class="svg-icon"><use href="#icon-trash"></use></svg></button>
+                        </td>
+                    </tr>
+                    <tr style="display:none;" class="detail-row">
+                        <td colspan="8" style="padding:0; border:none;">
+                            <div class="expanded-detail">
+                                <div class="grid-2">
+                                    <div>
+                                        <p><strong>Sowing Date:</strong> ${c.sow}</p>
+                                        <p><strong>Sensor ID:</strong> <span class="text-mono text-primary">${c.sensor}</span></p>
+                                        <p style="margin-top:12px;" class="text-muted">Notes: Regular monitoring required due to seasonal changes.</p>
+                                    </div>
+                                    <div class="card" style="padding:16px;">
+                                        <h4>Current Growth Phase</h4>
+                                        <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:12px;">
+                                            <div style="text-align:center; color:var(--mint-green); font-weight:bold;">Germination<br>✓</div>
+                                            <div style="text-align:center; color:var(--mint-green); font-weight:bold;">Vegetative<br>✓</div>
+                                            <div style="text-align:center; opacity:0.5;">Flowering<br>○</div>
+                                            <div style="text-align:center; opacity:0.5;">Maturation<br>○</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function toggleRowDetail(tr) {
+            const detailRow = tr.nextElementSibling;
+            if(detailRow.style.display === 'none') {
+                detailRow.style.display = 'table-row';
+                detailRow.querySelector('.expanded-detail').style.display = 'block';
+            } else {
+                detailRow.style.display = 'none';
+            }
+        }
+
+        function openCropDrawer() {
+            $('drawer-title').innerText = 'Add New Crop';
+            $('drawer-body').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Crop Name *</label>
+                    <input type="text" class="form-control" style="padding-left:16px;">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Type</label>
+                        <select class="form-control" style="padding-left:16px;">
+                            <option>Cereal</option><option>Vegetable</option><option>Cash Crop</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Assign Farmer</label>
+                        <select class="form-control" style="padding-left:16px;">
+                            <option>Ramesh Kumar</option><option>Sunita Devi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="rel-diagram">
+                    <div class="rel-box">Farmer<br><strong>Ramesh K.</strong></div>
+                    <div class="rel-arrow"></div>
+                    <div class="rel-box center">Crop<br><strong>New Crop</strong></div>
+                    <div class="rel-arrow"></div>
+                    <div class="rel-box">Sensor<br><strong>Assign...</strong></div>
+                </div>
+            `;
+            $('drawer-save').onclick = () => { closeDrawer(); showToast('Crop saved successfully'); };
+            $('overlay').classList.add('active');
+            $('app-drawer').classList.add('active');
+        }
+
+        /* =========================================
+           9. PAGE: SENSORS (CROWN JEWEL)
+        ========================================= */
+        function initSensors() {
+            updateAllSensors();
+            if(!sensorInterval) sensorInterval = setInterval(updateAllSensors, 5000);
+            renderSensorTable();
+        }
+
+        function updateAllSensors() {
+            // Update Dash first
+            if($('dashboard-page').classList.contains('active')) updateDashSensors();
+            
+            // If on sensor page, update hero cards
+            if($('sensors-page').classList.contains('active')) {
+                $('sensor-last-update').innerText = `Last update: ${formatTime(new Date())}`;
+                
+                // Temp 28-42
+                const t = Math.floor(Math.random() * (42 - 28 + 1) + 28);
+                const hcT = $('hc-temp');
+                $('hv-temp').innerHTML = `${t}<span class="hero-unit">°C</span>`;
+                $('hv-temp').style.animation = 'none'; void $('hv-temp').offsetWidth; $('hv-temp').style.animation = 'flipCounter 0.5s';
+                
+                let tDash = 251.2 * (1 - (t/50));
+                $('hr-temp').style.strokeDashoffset = tDash;
+                
+                if(t > 40) {
+                    hcT.className = 'hero-card temp critical';
+                    $('hr-temp').style.stroke = 'var(--coral-alert)';
+                    $('hb-temp').className = 'badge badge-danger'; $('hb-temp').innerText = 'Critical';
+                } else if(t > 35) {
+                    hcT.className = 'hero-card temp';
+                    $('hr-temp').style.stroke = 'var(--amber-warning)';
+                    $('hb-temp').className = 'badge badge-warning'; $('hb-temp').innerText = 'Caution';
+                } else {
+                    hcT.className = 'hero-card temp';
+                    $('hr-temp').style.stroke = 'var(--emerald-success)';
+                    $('hb-temp').className = 'badge badge-success'; $('hb-temp').innerText = 'Normal';
+                }
+
+                // Hum 40-90
+                const h = Math.floor(Math.random() * (90 - 40 + 1) + 40);
+                const hcH = $('hc-hum');
+                $('hv-hum').innerHTML = `${h}<span class="hero-unit">%</span>`;
+                $('hv-hum').style.animation = 'none'; void $('hv-hum').offsetWidth; $('hv-hum').style.animation = 'flipCounter 0.5s';
+                $('hr-hum').style.strokeDashoffset = 251.2 * (1 - (h/100));
+                
+                if(h > 80) {
+                    hcH.className = 'hero-card hum critical';
+                    $('hr-hum').style.stroke = 'var(--amber-warning)';
+                    $('hb-hum').className = 'badge badge-warning'; $('hb-hum').innerText = 'Caution';
+                } else {
+                    hcH.className = 'hero-card hum';
+                    $('hr-hum').style.stroke = '#4facfe';
+                    $('hb-hum').className = 'badge badge-success'; $('hb-hum').innerText = 'Normal';
+                }
+
+                // Soil 15-80
+                const s = Math.floor(Math.random() * (80 - 15 + 1) + 15);
+                const hcS = $('hc-soil');
+                $('hv-soil').innerHTML = `${s}<span class="hero-unit">%</span>`;
+                $('hv-soil').style.animation = 'none'; void $('hv-soil').offsetWidth; $('hv-soil').style.animation = 'flipCounter 0.5s';
+                $('hr-soil').style.strokeDashoffset = 251.2 * (1 - (s/100));
+                
+                if(s < 25) {
+                    hcS.className = 'hero-card soil critical';
+                    $('hr-soil').style.stroke = 'var(--coral-alert)';
+                    $('hb-soil').className = 'badge badge-danger'; $('hb-soil').innerText = 'Critical';
+                } else if(s < 40) {
+                    hcS.className = 'hero-card soil';
+                    $('hr-soil').style.stroke = 'var(--amber-warning)';
+                    $('hb-soil').className = 'badge badge-warning'; $('hb-soil').innerText = 'Caution';
+                } else {
+                    hcS.className = 'hero-card soil';
+                    $('hr-soil').style.stroke = 'var(--emerald-success)';
+                    $('hb-soil').className = 'badge badge-success'; $('hb-soil').innerText = 'Normal';
+                }
+                
+                // Add fake row to top of table
+                addNewSensorRow(t, h, s);
+            }
+        }
+
+        function renderSensorTable() {
+            let html = '';
+            for(let i=1; i<=15; i++) {
+                const t = Math.floor(Math.random() * 15) + 25;
+                const h = Math.floor(Math.random() * 40) + 50;
+                const s = Math.floor(Math.random() * 60) + 20;
+                html += generateSensorRow(`DAT-00${i}`, `SN-01${(i%5)+4}`, t, h, s, new Date(Date.now() - i*300000));
+            }
+            $('sensors-tbody').innerHTML = html;
+            
+            // Build Alerts Strip
+            let alertHtml = '';
+            for(let i=0; i<6; i++) {
+                alertHtml += `
+                    <div class="alert-pill">
+                        <div class="activity-dot" style="background:var(--coral-alert)"></div>
+                        <strong>SN-01${(i%2)+4}</strong> High Temp: 41°C <span class="text-muted" style="margin-left:8px;">${i+1}m ago</span>
+                    </div>
+                `;
+            }
+            $('sensor-alerts').innerHTML = alertHtml + alertHtml; // duplicate for smooth scroll
+            
+            // Init Sparklines
+            initSparklines();
+        }
+
+        function addNewSensorRow(t, h, s) {
+            const tbody = $('sensors-tbody');
+            if(!tbody) return;
+            const newRowHtml = generateSensorRow(`DAT-LIVE`, `SN-014`, t, h, s, new Date());
+            tbody.insertAdjacentHTML('afterbegin', newRowHtml);
+            if(tbody.children.length > 20) tbody.removeChild(tbody.lastChild);
+        }
+
+        function generateSensorRow(id, sn, t, h, s, d) {
+            let trClass = '';
+            let statusHtml = '<svg class="svg-icon text-mint"><use href="#icon-check"></use></svg>';
+            let tClass = '', hClass = '', sClass = '';
+            
+            if(t > 40) { trClass = 'row-critical'; statusHtml = '<svg class="svg-icon text-alert"><use href="#icon-close"></use></svg>'; tClass = 'text-alert'; }
+            else if(t > 35) { trClass = 'row-warning'; statusHtml = '<svg class="svg-icon text-warn"><use href="#icon-warning"></use></svg>'; tClass = 'text-warn'; }
+            else if(s < 25) { trClass = 'row-warning'; statusHtml = '<svg class="svg-icon text-warn"><use href="#icon-warning"></use></svg>'; sClass = 'text-warn'; }
+            else if(h > 85) { trClass = 'row-info'; hClass = 'text-primary'; }
+
+            return `
+                <tr class="${trClass}">
+                    <td class="text-mono">${id}</td>
+                    <td style="font-weight:600">${sn}</td>
+                    <td class="${tClass}">${t}°</td>
+                    <td class="${hClass}">${h}%</td>
+                    <td class="${sClass}">${s}%</td>
+                    <td class="text-mono text-muted">${formatTime(d)}</td>
+                    <td>${statusHtml}</td>
+                </tr>
+            `;
+        }
+
+        function initSparklines() {
+            const ctxs = ['spark1', 'spark2', 'spark3', 'spark4'];
+            ctxs.forEach(id => {
+                if(!$(id)) return;
+                const data = Array.from({length: 12}, () => Math.floor(Math.random() * 15) + 25);
+                new Chart($(id), {
+                    type: 'line',
+                    data: {
+                        labels: data.map((_, i) => i+'h'),
+                        datasets: [{
+                            data: data,
+                            borderColor: '#52b788',
+                            backgroundColor: 'rgba(82, 183, 136, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { x: { display: false }, y: { display: false } }
+                    }
+                });
+            });
+        }
+
+        /* =========================================
+           10. PAGE: IRRIGATION
+        ========================================= */
+        function renderIrrigation() {
+            let html = '';
+            DB.zones.forEach(z => {
+                const isOn = z.status === 'ON';
+                const tClass = isOn ? 'toggle-on' : 'toggle-off';
+                const tText = isOn ? 'Turn OFF' : 'Turn ON';
+                const fillHeight = isOn ? z.level : (z.level * 0.8); // sim slightly lower if off
+                
+                html += `
+                    <div class="zone-card">
+                        <div style="position:absolute; top:16px; left:16px;" class="badge badge-neutral">${z.id}</div>
+                        <div style="position:absolute; top:16px; right:16px;" class="badge ${isOn?'badge-success':'badge-neutral'}">${z.status}</div>
+                        <h3 style="margin-top:20px; margin-bottom:4px;">${z.name}</h3>
+                        <p class="text-muted" style="margin-bottom:20px; font-size:13px;">Crop: ${z.crop}</p>
+                        
+                        <div class="water-gauge">
+                            <div class="water-fill" style="height: ${fillHeight}%; ${!isOn?'background:linear-gradient(180deg,#bbb,#999);':''}"></div>
+                            <div class="gauge-text">${z.level}%</div>
+                        </div>
+                        
+                        <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px;">
+                            <span class="text-muted">Flow Rate:</span>
+                            <span style="font-weight:600; font-family:var(--font-mono)">${isOn ? z.flow : '0.0 L/m'}</span>
+                        </div>
+                        
+                        <button class="btn ${tClass} toggle-btn" onclick="toggleZone('${z.id}')">
+                            <div class="toggle-dot"></div>
+                            ${tText}
+                        </button>
+                    </div>
+                `;
+            });
+            $('irrigation-grid').innerHTML = html;
+        }
+
+        function toggleZone(id) {
+            const z = DB.zones.find(x => x.id === id);
+            showConfirmModal(
+                'Toggle Irrigation Zone',
+                `Are you sure you want to turn ${z.status === 'ON' ? 'OFF' : 'ON'} ${z.name}?`,
+                () => {
+                    z.status = z.status === 'ON' ? 'OFF' : 'ON';
+                    renderIrrigation();
+                    showToast(`Zone ${id} turned ${z.status}`, 'success');
+                    
+                    // Add log
+                    DB.logs.unshift({ time: new Date(), module: 'Irrigation', text: `Zone ${id} Turned ${z.status}`, trigger: 'Admin', status: 'OK' });
+                }
+            );
+        }
+
+        /* =========================================
+           11. PAGE: ANALYTICS
+        ========================================= */
+        let chartsInstance = [];
+        function initAnalytics() {
+            // Destroy existing if re-navigating
+            chartsInstance.forEach(c => c.destroy());
+            chartsInstance = [];
+
+            Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+            Chart.defaults.color = '#5a7a59';
+
+            // Chart 1: Temp Trend
+            const ctx1 = $('chart-temp');
+            chartsInstance.push(new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Avg Temperature (°C)',
+                        data: [28, 30, 31, 29, 32, 35, 34],
+                        borderColor: '#52b788',
+                        backgroundColor: 'rgba(82, 183, 136, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { grid: { display: false } }, x: { grid: { display: false } } }
+                }
+            }));
+
+            // Chart 2: Crop Health
+            const ctx2 = $('chart-health');
+            chartsInstance.push(new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Healthy', 'At Risk', 'Critical'],
+                    datasets: [{
+                        data: [65, 25, 10],
+                        backgroundColor: ['#06a77d', '#f4a261', '#ff6b6b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            }));
+
+            // Chart 3: Water Usage
+            const ctx3 = $('chart-water');
+            chartsInstance.push(new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        { label: 'Scheduled (L)', data: [1000, 1200, 1100, 1300, 1000, 1400, 1200], backgroundColor: '#52b788' },
+                        { label: 'Actual (L)', data: [1050, 1180, 1150, 1250, 1020, 1450, 1250], backgroundColor: '#2d5a4a' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { grid: { display: false }, stacked: false }, x: { grid: { display: false }, stacked: false } }
+                }
+            }));
+
+            // Chart 4: Alerts
+            const ctx4 = $('chart-alerts');
+            chartsInstance.push(new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['SN-014', 'SN-015', 'SN-016', 'SN-017', 'SN-018'],
+                    datasets: [{
+                        label: 'Alerts',
+                        data: [15, 3, 8, 2, 5],
+                        backgroundColor: '#ff6b6b',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { grid: { display: false } }, y: { grid: { display: false } } }
+                }
+            }));
+
+            // Render Logs Table
+            let html = '';
+            DB.logs.forEach(l => {
+                let badge = 'badge-success';
+                if(l.status === 'Warning') badge = 'badge-warning';
+                if(l.status === 'Critical') badge = 'badge-danger';
+                
+                let mb = 'badge-neutral';
+                if(l.module === 'Sensor') mb = 'badge-info';
+                if(l.module === 'Irrigation') mb = 'badge-success';
+                if(l.module === 'Farmer') mb = 'badge-warning';
+
+                html += `
+                    <tr>
+                        <td class="text-mono text-muted" style="font-size:12px;">${formatDateTime(l.time)}</td>
+                        <td><span class="badge ${mb}">${l.module}</span></td>
+                        <td>${l.text}</td>
+                        <td class="text-muted">${l.trigger}</td>
+                        <td><span class="badge ${badge}">${l.status}</span></td>
+                    </tr>
+                `;
+            });
+            $('logs-tbody').innerHTML = html;
+        }
+
+        /* =========================================
+           12. API CLIENT MOCK (FOR FLASK INTEGRATION)
+        ========================================= */
+        const API = {
+            // Uncomment the internals when Flask is running
+            getFarmers: async () => { /* return fetchWithErrorHandling('/api/farmers'); */ },
+            addFarmer: async (data) => { /* return fetchWithErrorHandling('/api/farmers', {method:'POST', body:JSON.stringify(data)}); */ },
+            updateFarmer: async (id, data) => { /* return fetchWithErrorHandling('/api/farmers/'+id, {method:'PUT', body:JSON.stringify(data)}); */ },
+            deleteFarmer: async (id) => { /* return fetchWithErrorHandling('/api/farmers/'+id, {method:'DELETE'}); */ },
+            
+            getCrops: async () => { /* return fetchWithErrorHandling('/api/crops'); */ },
+            addCrop: async (data) => { /* return fetchWithErrorHandling('/api/crops', {method:'POST', body:JSON.stringify(data)}); */ },
+            updateCrop: async (id, data) => { /* return fetchWithErrorHandling('/api/crops/'+id, {method:'PUT', body:JSON.stringify(data)}); */ },
+            deleteCrop: async (id) => { /* return fetchWithErrorHandling('/api/crops/'+id, {method:'DELETE'}); */ },
+            
+            getSensorReadings: async () => { /* return fetchWithErrorHandling('/api/sensor-data'); */ },
+            getLatestReading: async () => { /* return fetchWithErrorHandling('/api/sensor-data/latest'); */ },
+            get24hReadings: async () => { /* return fetchWithErrorHandling('/api/sensor-data/24h'); */ },
+            addSensorReading: async (data) => { /* return fetchWithErrorHandling('/api/sensor-data', {method:'POST', body:JSON.stringify(data)}); */ },
+            
+            getIrrigationZones: async () => { /* return fetchWithErrorHandling('/api/irrigation/zones'); */ },
+            toggleZone: async (id) => { /* return fetchWithErrorHandling('/api/irrigation/zones/'+id+'/toggle', {method:'PATCH'}); */ },
+            
+            getDashboardStats: async () => { /* return fetchWithErrorHandling('/api/dashboard/stats'); */ },
+            getAnalyticsSummary: async () => { /* return fetchWithErrorHandling('/api/analytics/summary'); */ },
+            getLogs: async () => { /* return fetchWithErrorHandling('/api/logs'); */ }
+        };
+
+        // Utility to handle fetch with error catching
+        async function fetchWithErrorHandling(url, options) {
+            try {
+                const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+                if(!response.ok) throw new Error('Network response was not ok');
+                return await response.json();
+            } catch (error) {
+                showToast('Something went wrong, please check your connection', 'error');
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+    </script>
+</body>
+</html>

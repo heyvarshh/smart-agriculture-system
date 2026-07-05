@@ -4,7 +4,7 @@ A full-stack farm management dashboard I built to help track farmers, crops, sen
 
 The idea is simple: Indian farmers deal with a lot of moving parts (weather, water, soil health, crop cycles). This system puts everything on a single screen so you can actually make sense of it.
 
-## What it does
+What it does
 
 - **Farmer management** — register farmers, track their land, contact info, active/inactive status
 - **Crop tracking** — sow dates, expected harvest, growth stage (shown as a percentage), health status
